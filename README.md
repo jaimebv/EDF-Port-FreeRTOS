@@ -13,8 +13,6 @@ Below, you will find a detailed step-by-step implementation.
 
 *FreeRTOS ships with a rock-solid fixed-priority scheduler;  you need a dynamic, optimal policy like Earliest Deadline First (EDF)! In this guide, we'll walk through how to retrofit EDF into FreeRTOS on an ESP32 (NodeMCU) using the ESP-IDF framework in PlatformIO. Sit back, grab a ☕, and let’s dive in!*
 
-*📑 Note: This implementation should also work for other boards, as we keep it abstract from the port. Thus, go ahead and give it a try if you need it.*
-
 ---
 ---
 

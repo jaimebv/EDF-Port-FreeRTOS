@@ -2,6 +2,8 @@
 
 Hello! You have arrived at the "clean" repository of the EDF-FreeRTOS porting. I have implemented this as a personal project and hope you find it useful. The goal is to enable the EDF scheduling policy for FreeRTOS. I used PlatformIO and the ESP32 NodeMCU board. However, the port should work for other boards as the changes are mainly introduced in the `task.c` file.
 
+*📑 Note: For simplicity, and keeping the repo lightweight, just the modified files are attached here. So this is not a "clone & play" repo.*
+
 Below, you will find a detailed step-by-step implementation. 
 
 

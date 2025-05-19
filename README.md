@@ -1,22 +1,24 @@
 # EDF-Port-FreeRTOS
 
+Hello! You have arrived at the "clean" repository of the EDF-FreeRTOS porting. I have implemented this as a personal project and hope you find it useful
+
 # 🚀 Bringing EDF Scheduling to FreeRTOS 🚀
 
 
-*FreeRTOS ships with a rock-solid fixed-priority scheduler,  you need a dynamic, optimal policy like Earliest Deadline First (EDF)! In this guide, we'll walk through how to retrofit EDF into FreeRTOS on an ESP32 (NodeMCU) using the ESP-IDF framework in PlatformIO. Sit back, grab a ☕, and let’s dive in!*
+*FreeRTOS ships with a rock-solid fixed-priority scheduler;  you need a dynamic, optimal policy like Earliest Deadline First (EDF)! In this guide, we'll walk through how to retrofit EDF into FreeRTOS on an ESP32 (NodeMCU) using the ESP-IDF framework in PlatformIO. Sit back, grab a ☕, and let’s dive in!*
 
-*📑 Note: This implementation should also work for other boards as we keep it abstract from the port. Thus, go ahead and give it a try if you need it.*
+*📑 Note: This implementation should also work for other boards, as we keep it abstract from the port. Thus, go ahead and give it a try if you need it.*
 
 ---
 ---
 
 
 
-## 🔍 A quick glimse into FreeRTOS
+## 🔍 A quick glimpse into FreeRTOS
 
-🚦 If you have already a deep understanding of FreeRTOS, you can directly jump to the next section!🚦
+🚦 If you already deeply understand FreeRTOS, you can directly jump to the next section!🚦
 
-FreeRTOS is designed to work in embedded environments, thus aiming to minimize the memory usage while being suitable for low clock frequency microcontrollers. The FreeRTOS minimum kernel consists of only three source files, for less than 9000 line of code.
+FreeRTOS is designed to work in embedded environments, thus aiming to minimize memory usage while being suitable for low-clock-frequency microcontrollers. The FreeRTOS minimum kernel consists of only three source files, for less than 9,000 lines of code.
 
 At its heart, the kernel splits into:
 - A **hardware-dependent layer** (per architecture)
@@ -24,16 +26,16 @@ At its heart, the kernel splits into:
 
 The **three** key files we need to understand are:
 
-* **`task.c`** Here the task function is defined, and its life cycle is managed. Scheduling functions are also defined here. 
+* **`task.c`** Here, the task function is defined, and its life cycle is managed. Scheduling functions are also defined here. 
 
-* **`queue.c`** In this file the structures used for task communication and synchronisation are described. In FreeRTOS, tasks and interrupts communicate witch each other using queues to exchange messages; semaphores and mutexes are used to synchronize the sharing of critical resources. 
+* **`queue.c`** In this file, the structures used for task communication and synchronisation are described. In FreeRTOS, tasks and interrupts communicate with each other using queues to exchange messages; semaphores and mutexes are used to synchronize the sharing of critical resources. 
 
-* **`list.c`** the list data structure and its maintaining functions are defined. Lists are used both by task functions and queues.
+* **`list.c`** The list data structure and its maintaining functions are defined. Lists are used both by task functions and queues.
 ---
 
 ### Tasks in a Nutshell 🎯
 
-Tasks are implemented as C functions. Each task created is essentially a standalone program with an assigned priority. Tasks run within their own context, independently of other tasks’ contexts. At any given moment, the OS chooses the task to execute based on its priority. 
+Tasks are implemented as C functions. Each task created is essentially a standalone program with an assigned priority. Tasks run within their context, independently of other tasks’ contexts. At any given moment, the OS chooses the task to execute based on its priority. 
 
 In summary:
 
@@ -102,7 +104,7 @@ This is a simple list used to allocate suspended tasks
 
 #### Task Creation & Delays ⏳
 
-A task is created invocating the `task.c` method `xTaskCreatePinnedToCore()`:
+A task is created invoking the `task.c` method `xTaskCreatePinnedToCore()`:
 
 ```c
 BaseType_t xTaskCreatePinnedToCore( TaskFunction_t pxTaskCode,
@@ -121,12 +123,12 @@ A task is created following these major steps:
 3. Init stack frame
 4. Add to Ready list
 
-The `vTaskDelayUntil()` function defines a frequency at which the task is periodically executed, so it can be used to implement periodic tasks. FreeRTOS measures time by periodically increasing the tick count variable, which is only available for core 0. `vTaskDelayUntil()` moves the invoking task to the Bloking list, where it waits for a given time interval before being moved to the Ready list again.
+The `vTaskDelayUntil()` function defines a frequency at which the task is periodically executed, so it can be used to implement periodic tasks. FreeRTOS measures time by periodically increasing the tick count variable, which is only available for core 0. `vTaskDelayUntil()` moves the invoking task to the Blocking list, where it waits for a given time interval before being moved to the Ready list again.
 
 ---
 ### Context Switch 🔄
 
-In FreeRTOS a task does not know when it is going to get suspended or resumed by the system. It only continues executing as long as there is not a context switching. When the running task is switched out, the execution context is saved in its stack, ready to be restored when the task will execute again. We will not go into detail on how this works, but is uses registers to point the running task and the next instruction in the task's code, so the task can be restored afterwards.
+In FreeRTOS, a task does not know when it is going to get suspended or resumed by the system. It only continues executing as long as there is no context switching. When the running task is switched out, the execution context is saved in its stack, ready to be restored when the task is executed again. We will not go into detail on how this works, but it uses registers to point to the running task and the next instruction in the task's code, so the task can be restored afterwards.
 
 The context switch is defined in `vTaskSwitchContext()`.
 
@@ -143,7 +145,7 @@ A hardware timer fires at `CONFIG_FREERTOS_HZ` (100 Hz by default → every 10 m
 
 ## 📂 Setting up the project
 
-If you wish to follow the exact implementation as I did, feel free to thoroughly complete each of the following steps. In case, you have your project already, you can simply use this as a guide on how to adapt it.
+If you wish to follow the exact implementation as I did, feel free to thoroughly complete each of the following steps. In case you have your project already, you can simply use this as a guide on how to adapt it.
 
 1. **Create the project:** In PlatformIO go ahead and create an empty project that uses the Espidf framework:
 
@@ -167,7 +169,7 @@ monitor_filters = esp32_exception_decoder
 
 2. **Get your own customizable FreeRTOS:** ESP-IDF’s CMake build will always look in your project’s components/ folder first, then fall back to the IDF installation in `C:\Users\<user_name>\.platformio\packages\framework-espidf\components\freertos`. You can exploit that to completely replace the FreeRTOS component for this project only.
 
-To do so, let's create the components folder into the platformio project:
+To do so, let's create the components folder in the platformio project:
 
 ```
 EDF-PORT-FREERTOS/
@@ -201,7 +203,7 @@ To check you are compiling the custom FreeRTOS, let's add a dummy error flag in 
 ```
 ---
 
-Clean and compile again the project. You should see the override error popping up in the console window.
+Clean and compile the project again. You should see the override error popping up in the console window.
 
 ```
 pio run -t clean
@@ -228,16 +230,16 @@ pio run
 
 ## 📅 Earliest Deadline First
 
-Earliest Deadline First (EDF) employs a dynamic priority-based preemptive scheduling policy. This means a task’s priority can change during its execution, and the execution of a task may be interrupted whenever a task with a higher (i.e., earlier deadline) priority becomes ready to run. Hence, the task with the highest priority is the one with the earliest deadline. In case of two or more tasks with the same absolute deadline, the highest priority task among them is chosen random.
+Earliest Deadline First (EDF) employs a dynamic priority-based preemptive scheduling policy. This means a task’s priority can change during its execution, and the execution of a task may be interrupted whenever a task with a higher (i.e., earlier deadline) priority becomes ready to run. Hence, the task with the highest priority is the one with the earliest deadline. In case of two or more tasks with the same absolute deadline, the highest priority task among them is chosen at random.
 
 
 The algorithm is designed for environments where the following assumptions hold:
 
 - **(A1)**: All tasks with hard deadlines are periodic, with a constant interval between successive requests.
-- **(A2)**: Deadlines are strictly run-ability constraints. Each task must complete before the next instance of the same task begins.
+- **(A2)**: Deadlines are strictly run-ability constraints. Each task must be completed before the next instance of the same task begins.
 - **(A3)**: Tasks are independent; the initiation or completion of one task does not depend on any other task.
 - **(A4)**: The run-time for each task is constant and does not change over time. Run-time is defined as the uninterrupted time required by the processor to execute the task.
-- **(A5)**: Any non-periodic tasks are exceptional cases, such as initialization or failure-recovery routines. These tasks may preempt periodic tasks during execution but do not have hard or critical deadlines themselves.
+- **(A5)**: Any non-periodic tasks are exceptional cases, such as initialization or failure-recovery routines. These tasks may preempt periodic tasks during execution, but do not have hard or critical deadlines themselves.
 
 Given these assumptions, it is possible to characterize a task in EDF by two parameters: its period and its runtime.
 
@@ -245,7 +247,7 @@ Given these assumptions, it is possible to characterize a task in EDF by two par
 
 ## 🛠️ Implementing EDF on FreeRTOS
 
-The idea is simple: Create a new ready list where tasks are put in priority order. The list should contain tasks ordered by increasing deadline time, where positions in the list represent the tasks priorities. The task priority (and thus the list) are updated at each system tick. Therefore, the task with the earliest deadline, will be the first in the list, so the scheduler gets it and gives it processing time. In case a new task has a closer deadline, the list will be updated and a context switch should occur.
+The idea is simple: Create a new ready list where tasks are put in priority order. The list should contain tasks ordered by increasing deadline time, where positions in the list represent the tasks' priorities. The task priority (and thus the list) is updated at each system tick. Therefore, the task with the earliest deadline will be the first in the list, so the scheduler gets it and gives it processing time. In case a new task has a closer deadline, the list will be updated, and a context switch should occur.
 
 We’ll keep the vanilla kernel intact and guard EDF changes with:
 
@@ -257,9 +259,9 @@ We’ll keep the vanilla kernel intact and guard EDF changes with:
 #endif
 
 ```
-*⚠️ Limitations: Current implementation has been considered for periodic tasks only and assumes tasks with implicit deadlines (deadline equals to task period).*
+*⚠️ Limitations: Current implementation has been considered for periodic tasks only and assumes tasks with implicit deadlines (deadline equals task period).*
 
-This are the steps we will follow:
+These are the steps we will follow:
 
 
 
@@ -294,10 +296,10 @@ Declare `xReadyTasksListEDF` as a simple list structure.
 #endif
 ```
 
-*📑 Note: You can add this code rigth before the declaration of the delayed task lists `PRIVILEGED_DATA static List_t xDelayedTaskList1;`*
+*📑 Note: You can add this code right before the declaration of the delayed task lists `PRIVILEGED_DATA static List_t xDelayedTaskList1;`*
 
 2. **Initialize the new Ready List**
-Then, modify the `prvInitialiseTaskLists()` method, that initialize all the task lists at the creation of the first task. Here we must add the initialization of `xReadyTasksListEDF`
+Then, modify the `prvInitialiseTaskLists()` method, which initializes all the task lists at the creation of the first task. Here we must add the initialization of `xReadyTasksListEDF`
 
 
 ```c
@@ -312,7 +314,7 @@ static void prvInitialiseTaskLists( void )
 }
 ```
 
-*📑 Note: You can add this code rigth after the declaration of the waiting lists `vListInitialise( &xDelayedTaskList2 );`*
+*📑 Note: You can add this code right after the declaration of the waiting lists `vListInitialise( &xDelayedTaskList2 );`*
 
 3. **Modify the prvAddTaskToReadyList macro**
 
@@ -336,7 +338,7 @@ Find this piece of code on the `task.c`:
 /*-----------------------------------------------------------*/
 ```
 
-Repalce it wit:
+Replace it with:
 
 
 ```c
@@ -394,12 +396,12 @@ Repalce it wit:
 
 This is what we are doing here:
 * Undefine the macro in case it was defined somewhere else
-* Get the core from which the macro is being called (which in ESP32 is always the core 0) and the target core of the task. We read the current core (`xPortGetCoreID()`) and the task’s pinned-to core (`pxTCB->xCoreID`). If they differ, we’ll send an IPI later so the other core re-schedules immediately .
+* Get the core from which the macro is being called (which in ESP32 is always the core 0) and the target core of the task. We read the current core (`xPortGetCoreID()`) and the task’s pinned-to core (`pxTCB->xCoreID`). If they differ, we’ll send an IPI later so the other core reschedules immediately.
 * Change the value of the deadline for the task (current tick count + period). By using `listSET_LIST_ITEM_VALUE` the list stays order based on the item value, which in our case is the deadlien. Therefore the list will be in deadline order because we always use the sorted insert API when we put a task into it. 
-* Insert the new list element un the `xReadyTasksListEDF` List. `vListInsert()` walks the list from the tail backwards until it finds the first item whose xItemValue (the deadline) is ≤ the new item’s value, and links it immediately after it. That keeps the list always sorted by `xItemValue` (i.e. by deadline) with no extra “rearrange” pass needed.
-* Case the task has no afinity, namely can run in any core or the target core is core 0, then pin the task to core 0. Otherwise, force the task to run in the other core (core 1). Simply adding to the list isn’t enough under EDF. when we have just made a sooner-deadline task ready, the kernel must re-evaluate right now. On the same core we call `portYIELD_WITHIN_API()`, which causes `vTaskSwitchContext()` to run as soon as we exit the critical section. If the task is pinned elsewhere, we send an inter-processor interrupt with `vPortYieldOtherCore()`
+* Insert the new list element in the `xReadyTasksListEDF` List. `vListInsert()` walks the list from the tail backwards until it finds the first item whose xItemValue (the deadline) is ≤ the new item’s value, and links it immediately after it. That keeps the list always sorted by `xItemValue` (i.e., by deadline) with no extra “rearrange” pass needed.
+* Case the task has no affinity, namely can run in any core, or the target core is core 0, then pin the task to core 0. Otherwise, force the task to run on the other core (core 1). Simply adding to the list isn’t enough under EDF. When we have just made a sooner-deadline task ready, the kernel must re-evaluate right now. On the same core we call `portYIELD_WITHIN_API()`, which causes `vTaskSwitchContext()` to run as soon as we exit the critical section. If the task is pinned elsewhere, we send an inter-processor interrupt with `vPortYieldOtherCore()`
 
-*📑 Note: `portYIELD_WITHIN_API();` and `vPortYieldOtherCore( xTargetCore );` functions are the unique port specific fuctions we use here. Therefore, its implementation may vary based on which board you are using. The equivalente methods should be found in `portmacro.h` if you are not using the ESP32 but following this tutorial for some other board.*
+*📑 Note: `portYIELD_WITHIN_API();` and `vPortYieldOtherCore( xTargetCore );` functions are the unique port-specific functions we use here. Therefore, its implementation may vary based on which board you are using. The equivalent methods should be found in `portmacro.h` if you are not using the ESP32 but following this tutorial for some other board.*
 
 
 4. **Add the period variable in the TCB**
@@ -421,7 +423,7 @@ typedef struct tskTaskControlBlock
 
 5. **Define a new Task creation**
 
-A new initialization task method for the EDF periodic tasks is created `xTaskCreateEDF()`
+A new initialization task method for the EDF periodic tasks is created, `xTaskCreateEDF()`
 
 
 ```c
@@ -474,7 +476,7 @@ A new initialization task method for the EDF periodic tasks is created `xTaskCre
 #endif /* configUSE_EDF_SCHEDULER */
 ```
 
-*📑 Note: You can add the method rigth after the block:*
+*📑 Note: You can add the method right after the block:*
 
 ```c
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
@@ -485,7 +487,7 @@ A new initialization task method for the EDF periodic tasks is created `xTaskCre
 
 6. **Modify the behavior of the IDLE task**
 
-An IDLE task with minimum priority should be created so in case the scheduler has no task to run, it executes the IDLE task. this prevents the system to abort execution and reboot given that there is nothing to run.
+An IDLE task with minimum priority should be created, so in case the scheduler has no task to run, it executes the IDLE task. This prevents the system to abort execution and reboot given that there is nothing to run.
 
 The IDLE task is initialized within the `vTaskStartScheduler()` method, which begins the real-time kernel tick processing and sets up all necessary scheduler structures. Since FreeRTOS requires a task to be running at all times, proper handling of the IDLE task is essential.
 
@@ -506,7 +508,7 @@ void vTaskStartScheduler( void )
            vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer,
                                               &pxIdleTaskStackBuffer,
                                               &ulIdleTaskStackSize );
-            /* The Idle task is created using user provided RAM - obtain the address of the RAM then create the idle task. */
+            /* The Idle task is created using user-provided RAM - obtain the address of the RAM then create the idle task. */
 
             /*Create Idle via EDF so it lands in xReadyTasksListEDF */
             #if ( configUSE_EDF_SCHEDULER == 1 )
@@ -700,7 +702,7 @@ BaseType_t xTaskCreateEDF( TaskFunction_t    pxTaskCode,
 
 9. **Enabling EDF**
 
-To enable the EDF scheduler it is required to define the macro in `FreeRTOSConfig.h`
+To enable the EDF scheduler, it is required to define the macro in `FreeRTOSConfig.h`
 
 ```c
 #define configUSE_EDF_SCHEDULER 1

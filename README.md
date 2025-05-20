@@ -798,3 +798,9 @@ By adjusting the processing in `foo();` to take 6 ticks and 5 ticks for Task 1 a
 
 
 *📑 Note: This Gantt plot has been obtained with real data captured from the FreeRTOS using EDF scheduling by setting the `void IRAM_ATTR vApplicationTickHook(void)` method. More details on how to do this will come after.*
+
+
+## 🎉 Wrapping Up
+
+* We have implemented EDF on top of FreeRTOS keeping the vanilla distribution and leveraging the same core functions.
+* We have created a simple hello world example to test EDF.

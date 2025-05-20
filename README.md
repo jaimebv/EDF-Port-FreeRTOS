@@ -804,3 +804,8 @@ By adjusting the processing in `foo();` to take 6 ticks and 5 ticks for Task 1 a
 
 * We have implemented EDF on top of FreeRTOS keeping the vanilla distribution and leveraging the same core functions.
 * We have created a simple hello world example to test EDF.
+
+
+Embedded today🔜, edge-powered tomorrow! 🔌📲
+
+Thanks for joining and see you at the silicon frontier! 

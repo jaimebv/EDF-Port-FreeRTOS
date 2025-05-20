@@ -723,9 +723,9 @@ Let's create a simple example:
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
  
-/* Task periods, in ticks (e.g. 500ms and 1000ms at a 1 ms tick) */
-#define TASK1_PERIOD pdMS_TO_TICKS(500)
-#define TASK2_PERIOD pdMS_TO_TICKS(1000)
+/* Task periods, in ticks (e.g. 500s and 100ms at a 2 ms tick) */
+#define TASK1_PERIOD pdMS_TO_TICKS(50)
+#define TASK2_PERIOD pdMS_TO_TICKS(100)
 
 
 /*-----------------------------------------------------------*/
@@ -736,6 +736,7 @@ static void vTask1( void *pvParameters )
     for( ;; )
     {
         printf( "Hello from Task 1 (period %u ticks)\n", (unsigned)TASK1_PERIOD );
+        /* foo(processingTask1);  */
         vTaskDelayUntil( &xLastWakeTime, TASK1_PERIOD );
     }
 }
@@ -747,6 +748,7 @@ static void vTask2( void *pvParameters )
     for( ;; )
     {
         printf( "Hello from Task 2 (period %u ticks)\n", (unsigned)TASK2_PERIOD );
+        /* foo(processingTask2);  */
         vTaskDelayUntil( &xLastWakeTime, TASK2_PERIOD );
     }
 }
@@ -788,3 +790,11 @@ void app_main( void )
 }
 
 ```
+
+
+By adjusting the processing in `foo();` to take 6 ticks and 5 ticks for Task 1 and Task 2 respectively, the system will schedule the task as in the image below:
+
+![image info](./img/EDF_plot_lines.jpg)
+
+
+*📑 Note: This Gantt plot has beeen obtained with real data from the FreeRTOS using EDF scheduling by setting the `void IRAM_ATTR vApplicationTickHook(void)` method. More on this will come after*

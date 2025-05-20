@@ -797,4 +797,4 @@ By adjusting the processing in `foo();` to take 6 ticks and 5 ticks for Task 1 a
 ![image info](./img/EDF_plot_lines.jpg)
 
 
-*📑 Note: This Gantt plot has beeen obtained with real data from the FreeRTOS using EDF scheduling by setting the `void IRAM_ATTR vApplicationTickHook(void)` method. More on this will come after*
+*📑 Note: This Gantt plot has been obtained with real data captured from the FreeRTOS using EDF scheduling by setting the `void IRAM_ATTR vApplicationTickHook(void)` method. More details on how to do this will come after.*

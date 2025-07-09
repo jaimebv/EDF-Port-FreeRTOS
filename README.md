@@ -714,6 +714,51 @@ To enable the EDF scheduler, it is required to define the macro in `FreeRTOSConf
 ---
 ---
 
+## 🔧 Exposing EDF Monitoring APIs
+
+In addition to the core scheduler changes, you can expose two helper APIs to query task period and deadline at run‐time without modifying `task.c` with `printf`:
+
+### 1. `xTaskGetPeriod()`
+
+**In `tasks.c`:**
+```c
+#if ( configUSE_EDF_SCHEDULER == 1 )
+/** Returns the static period (in ticks) assigned to a task. */
+TickType_t xTaskGetPeriod( TaskHandle_t xTaskHandle )
+{
+    TCB_t *pxTCB = (TCB_t *) xTaskHandle;
+    return pxTCB->xTaskPeriod;
+}
+#endif
+```
+**In `tasks.h`:**
+```c
+#if ( configUSE_EDF_SCHEDULER == 1 )
+TickType_t xTaskGetPeriod( TaskHandle_t xTaskHandle );
+#endif
+```
+### 2. `xTaskGetDeadline()`
+
+**In `tasks.c`:**
+```c
+#if ( configUSE_EDF_SCHEDULER == 1 )
+/** Returns the current absolute deadline (tick count) of a task. */
+TickType_t xTaskGetDeadline( TaskHandle_t xTaskHandle )
+{
+    TCB_t *pxTCB = (TCB_t *) xTaskHandle;
+    return (TickType_t) listGET_LIST_ITEM_VALUE( &pxTCB->xStateListItem );
+}
+#endif
+```
+**In `tasks.h`:**
+```c
+#if ( configUSE_EDF_SCHEDULER == 1 )
+TickType_t xTaskGetDeadline( TaskHandle_t xTaskHandle );
+#endif
+```
+
+
+
 ✨ That’s it! You’ve now got a fully functional EDF scheduler on top of FreeRTOS, with minimal intrusion into the existing codebase. Time to fire up PlatformIO and watch those deadlines dance! 🎉
 
 Let's create a simple example:

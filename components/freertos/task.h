@@ -395,7 +395,8 @@ BaseType_t xTaskCreateEDF( TaskFunction_t    pxTaskCode,
                            TaskHandle_t *    pxCreatedTask,
                            TickType_t        xPeriod,
                            BaseType_t        xCoreID );
-
+TickType_t xTaskGetPeriod( TaskHandle_t xTaskHandle );
+TickType_t xTaskGetDeadline( TaskHandle_t xTaskHandle );
 #endif /* configUSE_EDF_SCHEDULER */
 
 /**

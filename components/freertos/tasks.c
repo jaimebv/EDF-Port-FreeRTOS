@@ -6722,3 +6722,27 @@ BaseType_t __attribute__( ( weak ) ) xTimerCreateTimerTask( void )
 {
     return pdPASS;
 }
+#if ( configUSE_EDF_SCHEDULER == 1 )
+/*------------------------------------------------------------------------------*/
+/*  Returns the EDF period (in ticks) that was assigned to the task’s TCB.      */
+/*------------------------------------------------------------------------------*/
+TickType_t xTaskGetPeriod( TaskHandle_t xTaskHandle )
+{
+    /* We know TaskHandle_t is really a pointer to our TCB_t */
+    TCB_t *pxTCB = ( TCB_t * ) xTaskHandle;
+    return pxTCB->xTaskPeriod;
+}
+/*------------------------------------------------------------------------------*/
+#endif
+
+#if ( configUSE_EDF_SCHEDULER == 1 )
+/*------------------------------------------------------------------------------
+ * Returns the *absolute* deadline (tick count) currently stored in the TCB.
+ *----------------------------------------------------------------------------*/
+TickType_t xTaskGetDeadline( TaskHandle_t xTaskHandle )
+{
+    TCB_t *pxTCB = (TCB_t *) xTaskHandle;
+    /* listGET_LIST_ITEM_VALUE returns the xItemValue we set via listSET_LIST_ITEM_VALUE */
+    return ( TickType_t ) listGET_LIST_ITEM_VALUE( &( pxTCB->xStateListItem ) );
+}
+#endif

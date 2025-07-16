@@ -741,7 +741,7 @@ At the end of the `StaticTask_t` structure include:
 ---
 ## 🔧 Exposing EDF Monitoring APIs
 
-In addition to the core scheduler changes, you can expose two helper APIs to query task period and deadline at run‐time without modifying `task.c` with `printf`:
+In addition to the core scheduler changes, you can expose two helper APIs to query task period and deadline at run‐time:
 
 ### 1. `xTaskGetPeriod()`
 

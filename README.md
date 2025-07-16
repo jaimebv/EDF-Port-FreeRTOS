@@ -356,10 +356,13 @@ Replace it with:
         traceMOVED_TASK_TO_READY_STATE( pxTCB );                                  \
                                                                                   \
         /* 1) Tag the absolute deadline */                                        \
+        TickType_t xDeadline =                                                    \
+            xTaskGetTickCount() + ( pxTCB )->xTaskPeriod;                         \
         listSET_LIST_ITEM_VALUE(                                                  \
             &( ( pxTCB )->xStateListItem ),                                       \
-            xTaskGetTickCount() + ( pxTCB )->xTaskPeriod                          \
+            xDeadline                                                             \
         );                                                                        \
+        ( pxTCB )->xTaskDeadline =    xDeadline;                                  \
                                                                                   \
         /* 2) Must lock around a shared list on SMP */                            \
         taskENTER_CRITICAL( &xKernelLock );                                       \
@@ -420,6 +423,7 @@ typedef struct tskTaskControlBlock
 
     #if ( configUSE_EDF_SCHEDULER == 1 )
         TickType_t xTaskPeriod;   /* Period (in ticks) for EDF deadline */
+        TickType_t xTaskDeadline; /* The latest task deadline (in ticks) */
     #endif
 
 } tskTCB;
@@ -465,11 +469,15 @@ A new initialization task method for the EDF periodic tasks is created, `xTaskCr
             uxListRemove( &( pxTCB->xStateListItem ) );
 
             pxTCB->xTaskPeriod = xPeriod;
-
+            
             /* 2.3) Set the absolute-deadline = now + period */
-            listSET_LIST_ITEM_VALUE( &( pxTCB->xStateListItem ),
-                                    xTaskGetTickCount() + xPeriod );
-
+            TickType_t xDeadline =                                              
+                xTaskGetTickCount() + ( pxTCB )->xTaskPeriod;                   
+            listSET_LIST_ITEM_VALUE(                                            
+                &( ( pxTCB )->xStateListItem ),                                 
+                xDeadline                                                        
+            ); 
+            ( pxTCB )->xTaskDeadline =   xDeadline; 
             /* 2.4) Insert it exactly once into the EDF list, in deadline order */
             vListInsert( &xReadyTasksListEDF,
                         &( pxTCB->xStateListItem ) );
@@ -711,9 +719,26 @@ To enable the EDF scheduler, it is required to define the macro in `FreeRTOSConf
 ```c
 #define configUSE_EDF_SCHEDULER 1
 ```
----
----
 
+
+10. **Change the static allocation**
+This change is required to include xTaskPeriod and xTaskDeadline when FreeRTOS tries to use static allocation.
+
+At the end of the `StaticTask_t` structure include:
+
+```c
+/*In FreeRTOS.h*/
+
+...
+#if ( configUSE_EDF_SCHEDULER == 1 )
+    TickType_t xTaskPeriod;   /* Match the new field in TCB_t */
+    TickType_t xTaskDeadline;   /* Match the new field in TCB_t */
+#endif
+} StaticTask_t;
+```
+
+---
+---
 ## 🔧 Exposing EDF Monitoring APIs
 
 In addition to the core scheduler changes, you can expose two helper APIs to query task period and deadline at run‐time without modifying `task.c` with `printf`:
@@ -746,7 +771,7 @@ TickType_t xTaskGetPeriod( TaskHandle_t xTaskHandle );
 TickType_t xTaskGetDeadline( TaskHandle_t xTaskHandle )
 {
     TCB_t *pxTCB = (TCB_t *) xTaskHandle;
-    return (TickType_t) listGET_LIST_ITEM_VALUE( &pxTCB->xStateListItem );
+    return ( TickType_t ) ( pxTCB->xTaskDeadline);
 }
 #endif
 ```
